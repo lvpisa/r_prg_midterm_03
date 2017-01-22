@@ -1,0 +1,90 @@
+---
+title: "r_prg_midterm_03"
+author: "陳韋哲"
+date: "2017/1/22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R程式設計班第三次期中作業：使用`ggplot2`繪製簡單的統計圖
+
+```{r echo = FALSE}
+library(ggplot2)
+```
+
+說明： `diamonds`是`ggplot2`內的資料。共有53,940顆鑽石的克拉數(carat)、切工(cut)、顏色(color)、淨度(calrity)與價格(price)等資料。前6筆的資料如下。
+```{r}
+head(diamonds)
+```
+
+
+#1. 散佈圖
+探討顏色是G且淨度是VVS1的鑽石克拉數與價格的關係，因此繪製散佈圖。
+
+```{r}
+#先挑選出顏色是G且淨度是VVS1的鑽石資料為dd
+dd <- subset(diamonds, color == "G" & clarity == "VVS1")
+#作圖並加上linear model的回歸曲線
+ggplot(dd, aes(x = carat, y = price))+geom_point()+geom_smooth(method ="lm")+ ggtitle("Price vs Carat of Diamonds")+ xlab("Carat")+ ylab("Price")
+```
+
+或者想了解不同切工克拉數與價格的關係。
+```{r}
+#將鑽石的不同切工（cut）分開作圖並加上linear model的回歸曲線
+ggplot(dd, aes(x = carat, y = price, color = cut))+geom_point()+geom_smooth(method ="lm")+ggtitle("Price vs Carat of Diamonds of Different Cuts")+ xlab("Carat")+ ylab("Price")
+```
+
+
+#2. 線圖
+```{r}
+head(airmiles)
+```
+說明：`airmiles`是1937年到1960年共24年間美國旅客航空的里程數變化。
+```{r message = FALSE}
+airmiles_num <- as.numeric(airmiles)
+airmiles_df <- data.frame(airmiles_num)
+ggplot(airmiles_df, aes(x =1937:1960, y = airmiles))+geom_line()+geom_point() + xlab("Year")+ ylab("Passenger Miles/year")+ ggtitle("Passenger Miles on Commercial US Airlines, 1937–1960")
+```
+
+
+#3.直方圖
+說明：探討顏色是G且淨度是VVS1的0.4-0.6克拉鑽石的價格分佈
+```{r message = FALSE}
+dd_carat46 <- dd[dd$carat<0.6& dd$carat>=0.4,]
+ggplot(dd_carat46, aes(x= price)) + geom_histogram()+xlab("Price")+ylab("Numbers of Diamonds")
+```
+
+或者將不同的切工分別做圖，看顏色是G且淨度是VVS1的0.4-0.6克拉鑽石的價格分佈
+```{r message = FALSE}
+ggplot(dd_carat46, aes(x= price)) + geom_histogram() + facet_wrap(~ cut)+xlab("Price")+ylab("Numbers of Diamonds")
+```
+
+
+#4. 盒鬚圖
+說明：探討顏色是G且淨度是VVS1的0.4-0.6克拉鑽石的價格分佈
+```{r}
+ggplot(dd_carat46,aes(x = 1, y =price)) + geom_boxplot()+ylab("Price")+xlab("")
+```
+
+或者探討不同的切工，顏色是G且淨度是VVS1的0.4-0.6克拉鑽石的價格分佈
+```{r}
+ggplot(dd_carat46,aes(x = cut, y =price)) + geom_boxplot()+ylab("Price")+xlab("Cut")
+```
+
+
+#5. 長條圖
+說明：顏色是G且淨度是VVS1的0.4-0.6克拉鑽石不同切工的個數
+```{r}
+ggplot(dd_carat46, aes(x = cut))+geom_bar()+xlab("Cut")+ylab("Numbers of Diamonds")
+```
+
+或者用`plotly`繪製資料中所有鑽石不同切工的個數的互動長條圖
+```{r include= FALSE}
+library(plotly)
+```
+``` {r}
+ggplotly(ggplot(diamonds, aes(x = cut))+geom_bar(aes(fill=color),position="dodge") + xlab("Cut")+ylab("Numbers of Diamonds"))
+```
